@@ -14,10 +14,13 @@ import {createHeading} from "../components/heading.mjs";
 
 // Hashtag view: show all tweets containing this tag
 
-function hashtagView(hashtag) {
+async function hashtagView(hashtag) {
   destroy();
 
-  apiService.getBloomsByHashtag(hashtag);
+  // prevent infinite loop
+  if (state.currentHashtag !== `#${hashtag}`) {
+    await apiService.getBloomsByHashtag(hashtag);
+  }
 
   renderOne(
     state.isLoggedIn,
@@ -28,6 +31,7 @@ function hashtagView(hashtag) {
   document
     .querySelector("[data-action='logout']")
     ?.addEventListener("click", handleLogout);
+
   renderOne(
     state.isLoggedIn,
     getLoginContainer(),
@@ -35,8 +39,8 @@ function hashtagView(hashtag) {
     createLogin
   );
   document
-    .querySelector("[data-action='login']")
-    ?.addEventListener("click", handleLogin);
+    .querySelector('[data-form="login"]')
+    ?.addEventListener("submit", handleLogin); // also fix this 👀
 
   renderOne(
     state.currentHashtag,
@@ -44,6 +48,7 @@ function hashtagView(hashtag) {
     "heading-template",
     createHeading
   );
+
   renderEach(
     state.hashtagBlooms || [],
     getTimelineContainer(),
