@@ -37,12 +37,7 @@ async function init() {
       await apiService.getProfile(profileUsername);
     }
   }
-
   handleRouteChange();
-
-  document.addEventListener("state-change", () => {
-    handleRouteChange();
-  });
 }
 
 // TODO Check any unhandled errors bubble up to this central handler
