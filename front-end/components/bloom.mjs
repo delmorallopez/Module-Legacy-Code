@@ -10,6 +10,9 @@
  * "sent_timestamp": "datetime as ISO 8601 formatted string"}
 
  */
+
+import { apiService } from "../index.mjs";
+
 const createBloom = (template, bloom) => {
   if (!bloom) return;
   const bloomFrag = document.getElementById(template).content.cloneNode(true);
@@ -20,6 +23,13 @@ const createBloom = (template, bloom) => {
   const bloomTime = bloomFrag.querySelector("[data-time]");
   const bloomTimeLink = bloomFrag.querySelector("a:has(> [data-time])");
   const bloomContent = bloomFrag.querySelector("[data-content]");
+  const rebloomButton = bloomFrag.querySelector("[data-action='rebloom']");
+
+  if (rebloomButton) {
+    rebloomButton.addEventListener("click", () => {
+      apiService.rebloom(bloom.id);
+    });
+  }
 
   bloomArticle.setAttribute("data-bloom-id", bloom.id);
   bloomUsername.setAttribute("href", `/profile/${bloom.sender}`);
@@ -30,6 +40,18 @@ const createBloom = (template, bloom) => {
     ...bloomParser.parseFromString(_formatHashtags(bloom.content), "text/html")
       .body.childNodes
   );
+
+  if (bloom.original_bloom_id) {
+    const header = bloomFrag.querySelector(".bloom__header");
+  
+    const rebloomInfo = document.createElement("div");
+    rebloomInfo.textContent = `${bloom.sender} re-bloomed`;
+  
+    header.prepend(rebloomInfo);
+  
+    // Show original author instead
+    bloomUsername.textContent = bloom.original_sender;
+  }
 
   return bloomFrag;
 };

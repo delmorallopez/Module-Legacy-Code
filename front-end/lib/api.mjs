@@ -173,6 +173,26 @@ async function getBlooms(username) {
   }
 }
 
+
+async function rebloom(bloomId) {
+  try {
+    const data = await _apiRequest("/bloom", {
+      method: "POST",
+      body: JSON.stringify({
+        original_bloom_id: bloomId,
+      }),
+    });
+
+    if (data.success) {
+      await getBlooms();
+    }
+
+    return data;
+  } catch (error) {
+    return { success: false };
+  }
+}
+
 /**
  * Fetches blooms containing a specific hashtag
  */
@@ -292,6 +312,7 @@ const apiService = {
   getBlooms,
   postBloom,
   getBloomsByHashtag,
+  rebloom,
 
   // User methods
   getProfile,

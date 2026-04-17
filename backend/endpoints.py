@@ -152,19 +152,28 @@ def do_follow():
 
 @jwt_required()
 def send_bloom():
-    type_check_error = verify_request_fields({"content": str})
-    if type_check_error is not None:
-        return type_check_error
-
     user = get_current_user()
+    data = request.json
 
-    blooms.add_bloom(sender=user, content=request.json["content"])
+    if "content" in data:
+        content = data["content"]
 
-    return jsonify(
-        {
-            "success": True,
-        }
-    )
+    elif "original_bloom_id" in data:
+        original = blooms.get_bloom(data["original_bloom_id"])
+        if not original:
+            return jsonify({"error": "Bloom not found"}), 404
+
+        content = f"🔁 {user.username} rebloomed: {original.content}"
+
+    else:
+        return jsonify({"error": "Missing content"}), 400
+
+    if len(content) > 280:
+        return jsonify({"error": "Too long"}), 400
+
+    blooms.add_bloom(sender=user, content=content)
+
+    return jsonify({"success": True})
 
 
 def get_bloom(id_str):
@@ -176,6 +185,23 @@ def get_bloom(id_str):
     if bloom is None:
         return make_response((f"Bloom not found", 404))
     return jsonify(bloom)
+
+
+@jwt_required()
+def rebloom():
+    user = get_current_user()
+
+    bloom_id = request.json.get("bloom_id")
+    original = blooms.get_bloom(bloom_id)
+
+    if not original:
+        return jsonify({"error": "Not found"}), 404
+
+    return blooms.add_bloom(
+        sender=user,
+        content=original.content
+    )
+
 
 
 @jwt_required()
