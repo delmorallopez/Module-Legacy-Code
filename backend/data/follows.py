@@ -1,7 +1,7 @@
 from typing import List
 
 from data.connection import db_cursor
-from data.users import User
+from data.users import User, get_user
 
 from psycopg2.errors import UniqueViolation
 
@@ -19,6 +19,24 @@ def follow(follower: User, followee: User):
         except UniqueViolation:
             # Already following - treat as idempotent request.
             pass
+
+def unfollow(*, follower, follow_username: str):
+    follow_user = get_user(follow_username)
+    if follow_user is None:
+        return
+
+    with db_cursor() as cur:
+        cur.execute(
+            """
+            DELETE FROM follows
+            WHERE follower = %(follower_id)s
+              AND followee = %(followee_id)s
+            """,
+            {
+                "follower_id": follower.id,
+                "followee_id": follow_user.id,
+            },
+        )
 
 
 def get_followed_usernames(follower: User) -> List[str]:

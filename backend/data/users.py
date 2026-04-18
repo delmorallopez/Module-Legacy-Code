@@ -47,6 +47,18 @@ def get_user(username: str) -> Optional[User]:
         )
 
 
+def unfollow(*, follower: User, follow_username: str):
+    with db_cursor() as cur:
+        cur.execute(
+            """
+            DELETE FROM follows
+            WHERE follower = %(follower)s
+            AND followee = (SELECT id FROM users WHERE username = %(username)s)
+            """,
+            {"follower": follower.id, "username": follow_username},
+        )
+
+        
 def get_suggested_follows(following_user: User, limit: int) -> List[str]:
     with db_cursor() as cur:
         cur.execute(

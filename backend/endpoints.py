@@ -1,6 +1,6 @@
 from typing import Dict, Union
 from data import blooms
-from data.follows import follow, get_followed_usernames, get_inverse_followed_usernames
+from data.follows import follow, unfollow, get_followed_usernames, get_inverse_followed_usernames
 from data.users import (
     UserRegistrationError,
     get_suggested_follows,
@@ -149,7 +149,14 @@ def do_follow():
         }
     )
 
+@jwt_required()
+def do_unfollow(username):
+    current_user = get_current_user()
 
+    unfollow(follower=current_user, follow_username=username)
+
+    return jsonify({"success": True})
+    
 @jwt_required()
 def send_bloom():
     type_check_error = verify_request_fields({"content": str})
