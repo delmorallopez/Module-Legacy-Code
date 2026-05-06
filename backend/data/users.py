@@ -48,14 +48,21 @@ def get_user(username: str) -> Optional[User]:
 
 
 def unfollow(*, follower: User, follow_username: str):
+    follow_user = get_user(follow_username)
+    if follow_user is None:
+        raise ValueError(f"User '{follow_username}' does not exist")
+
     with db_cursor() as cur:
         cur.execute(
             """
             DELETE FROM follows
             WHERE follower = %(follower)s
-            AND followee = (SELECT id FROM users WHERE username = %(username)s)
+              AND followee = %(followee)s
             """,
-            {"follower": follower.id, "username": follow_username},
+            {
+                "follower": follower.id,
+                "followee": follow_user.id,
+            },
         )
 
         
