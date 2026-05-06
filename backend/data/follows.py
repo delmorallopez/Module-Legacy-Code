@@ -23,7 +23,7 @@ def follow(follower: User, followee: User):
 def unfollow(*, follower, follow_username: str):
     follow_user = get_user(follow_username)
     if follow_user is None:
-        return
+        raise ValueError(f"User '{follow_username}' does not exist")
 
     with db_cursor() as cur:
         cur.execute(
