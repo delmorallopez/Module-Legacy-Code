@@ -46,26 +46,6 @@ def get_user(username: str) -> Optional[User]:
             password_scrypt=bytes(password_scrypt),
         )
 
-
-def unfollow(*, follower: User, follow_username: str):
-    follow_user = get_user(follow_username)
-    if follow_user is None:
-        raise ValueError(f"User '{follow_username}' does not exist")
-
-    with db_cursor() as cur:
-        cur.execute(
-            """
-            DELETE FROM follows
-            WHERE follower = %(follower)s
-              AND followee = %(followee)s
-            """,
-            {
-                "follower": follower.id,
-                "followee": follow_user.id,
-            },
-        )
-
-        
 def get_suggested_follows(following_user: User, limit: int) -> List[str]:
     with db_cursor() as cur:
         cur.execute(
